@@ -1,0 +1,13 @@
+sudo: false
+language: python
+
+
+python:
+  - "2.7"
+  - "pypy"
+
+install:
+    - pip install -r test-requirements.txt
+
+script:
+    - py.test --cov=elanus tests
