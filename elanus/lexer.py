@@ -1,34 +1,36 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from re import Scanner
 from ast import literal_eval
+from .scanner import StringScanner
 from .token import *
 
 
-class Lexer(object):
-    def rules(self):
-        result = [
-            (r"\n",                                       self.newline),
-            (r"\s+",                                      self.space),
-            (r"\d+\.\d+",                                 self.float),
-            (r"\d+",                                      self.int),
-            (r"\+|-|\*|\/|=|==|>|<|\(|\)|\[|\]|\||,",     self.opration),
-            (r"(let|func|do|end|return)\b",               self.keyword),
-            (r"[a-zA-Z_][a-zA-Z_0-9]*(\?|!)?",            self.ident)
+class Lexer(StringScanner):
+    def lexicon(self):
+        return [
+            ("newline",      r"\n"),
+            ("space",        r"\s+"),
+            ("float",        r"\d+\.\d+"),
+            ("int",          r"\d+"),
+            ("opration",     r"\+|-|\*|\/|=|==|>|<|\"|\'|\(|\)|\[|\]|\||,"),
+            ("keyword",      r"(let|func|do|end|return)\b"),
+            ("ident",        r"[a-zA-Z_][a-zA-Z_0-9]*(\?|!)?")
         ]
-        return result
 
     def __init__(self, string):
+        super(Lexer, self).__init__(string)
         self.line, self.column = 1, 1
-        scanner = Scanner(self.rules())
-        self.result, self.remain = scanner.scan(string)
-        if self.remain != '':
-            print("Lexer error, can not lex {} at line {}, column {}".format(self.remain, self.line, self.column))
 
-    macro = ("def {name}(self, _, value):\n"
+    def newline(self, value):
+        result = Token('NEWLINE', value, self.line, self.column)
+        self.column = 1
+        self.line += 1
+        return result
+
+    macro = ("def {name}(self, value):\n"
              "    result = Token('{type}', value, self.line, self.column)\n"
              "    self.column += len(value)\n"
              "    return result")
 
-    for type in ["NEWLINE", "SPACE", "FLOAT", "INT", "OPRATION", "IDENT", "KEYWORD"]:
+    for type in ["SPACE", "FLOAT", "INT", "OPRATION", "IDENT", "KEYWORD"]:
         exec(macro.format(name=type.lower(), type=type))
