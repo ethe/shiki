@@ -5,7 +5,10 @@ import re
 class StringScanner(object):
     def __init__(self, string):
         self.string = string
+        self.word = None
         self.lexicon = [(name, re.compile(phrase)) for name, phrase in self.lexicon()]
+        self.stream = self.scan()
+        self.next = self.stream.next
 
     def scan(self):
         while self.string != '':
@@ -15,9 +18,13 @@ class StringScanner(object):
                 if match:
                     self.string = self.string[match.end():]
                     success = True
-                    yield getattr(self, name)(match.group())
+                    self.word = getattr(self, name)(match.group())
+                    yield self.word
             if not success:
                 raise ScanFailedException()
+
+    def __iter__(self):
+        return self.stream.__iter__()
 
 
 class ScanFailedException(Exception):

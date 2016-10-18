@@ -34,3 +34,23 @@ class Lexer(StringScanner):
 
     for type in ["SPACE", "FLOAT", "INT", "OPRATION", "IDENT", "KEYWORD"]:
         exec(macro.format(name=type.lower(), type=type))
+
+    def assert_(self, value):
+        if self.word.value == value:
+            return True
+        raise BaseException()
+
+    def assert_type_(self, type):
+        if self.word.type == type:
+            return True
+        raise BaseException()
+
+    def assert_next(self, value):
+        if self.word.value == value:
+            return self.next()
+        raise BaseException()
+
+    def assert_type_next(self, type):
+        if self.word.type == type:
+            return self.next()
+        raise BaseException()
