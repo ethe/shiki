@@ -21,6 +21,7 @@ class Parser(Lexer):
             return self.parse_int()
         elif self.word.type == "IDENT":
             return self.parse_call()
+        raise ParseException(self.line, self.column)
 
     def parse_int(self):
         result = Int(self.word.value, self.line)
@@ -41,3 +42,9 @@ class Parser(Lexer):
         self.assert_type_next("SPACE")
         value = self.parse_expression()
         return Bind(name, value, self.line)
+
+
+class ParseException(Exception):
+    def __init__(self, line, column):
+        super(ParseException, self).__init__(
+            "Can not parse expression, at line {line}, column {column}".format(line=line, column=column))

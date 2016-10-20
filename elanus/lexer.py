@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 from ast import literal_eval
 from .scanner import StringScanner
 from .token import *
@@ -38,19 +37,23 @@ class Lexer(StringScanner):
     def assert_(self, value):
         if self.word.value == value:
             return True
-        raise BaseException()
+        raise ParseException(self.line, self.column)
 
     def assert_type_(self, type):
         if self.word.type == type:
             return True
-        raise BaseException()
+        raise ParseException(self.line, self.column)
 
     def assert_next(self, value):
-        if self.word.value == value:
+        if self.assert_(value):
             return self.next()
-        raise BaseException()
 
     def assert_type_next(self, type):
-        if self.word.type == type:
+        if self.assert_type_(type):
             return self.next()
-        raise BaseException()
+
+
+class LexException(Exception):
+    def __init__(self, line, column):
+        super(LexException, self).__init__(
+            "Find unexpected token, at line {line}, column {column}".format(line=line, column=column))

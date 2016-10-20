@@ -21,12 +21,13 @@ class StringScanner(object):
                     self.word = getattr(self, name)(match.group())
                     yield self.word
             if not success:
-                raise ScanFailedException()
+                raise ScanException(self.line, self.column)
 
     def __iter__(self):
         return self.stream.__iter__()
 
 
-class ScanFailedException(Exception):
-    def __init__(self):
-        super(ScanFailedException, self).__init__("Can not scan anymore.")
+class ScanException(Exception):
+    def __init__(self, line, column):
+        super(ScanException, self).__init__(
+            "Can not itdentify word, at line {line}, column {column}".format(line=line, column=column))

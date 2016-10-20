@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from elanus.lexer import Lexer
 from elanus.token import Token
-from elanus.scanner import ScanFailedException
+from elanus.scanner import ScanException
 
 
 def test_lex_int():
@@ -34,7 +34,7 @@ def test_lex_error():
     try:
         Lexer("???").next()
     except Exception as e:
-        assert isinstance(e, ScanFailedException)
+        assert isinstance(e, ScanException)
 
 
 def test_lex_function():
@@ -49,7 +49,3 @@ def test_lex_function():
 
 def test_repr():
     assert repr(Lexer("foo").next()) == "<Token IDENT>"
-
-
-if __name__ == '__main__':
-    main()

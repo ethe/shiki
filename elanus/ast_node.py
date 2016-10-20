@@ -17,10 +17,12 @@ class Expression(Node):
 
 class Call(Expression):
     def __init__(self, name="", args=[], line=0):
-        super(Expressions, self).__init__(line)
+        super(Call, self).__init__(line)
         self.name = name
         self.args = args
-        self.expressions = expressions
+
+    def __eq__(self, another):
+        return self.type == another.type and self.args == self.args
 
 
 class Bind(Expression):
