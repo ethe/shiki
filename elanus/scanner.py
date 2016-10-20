@@ -23,6 +23,9 @@ class StringScanner(object):
             if not success:
                 raise ScanException(self.line, self.column)
 
+    def eof(self):
+        return self.string == ""
+
     def __iter__(self):
         return self.stream.__iter__()
 

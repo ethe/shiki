@@ -22,7 +22,7 @@ class Call(Expression):
         self.args = args
 
     def __eq__(self, another):
-        return self.type == another.type and self.args == self.args
+        return self.name == another.name and self.args == self.args
 
 
 class Bind(Expression):
@@ -42,6 +42,9 @@ class Number(Expression):
     def __init__(self, number, line=0):
         super(Number, self).__init__(line)
         self.value = number
+
+    def __eq__(self, another):
+        return self.value == another.value
 
 
 class Int(Number):

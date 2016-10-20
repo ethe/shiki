@@ -34,26 +34,34 @@ class Lexer(StringScanner):
     for type in ["SPACE", "FLOAT", "INT", "OPRATION", "IDENT", "KEYWORD"]:
         exec(macro.format(name=type.lower(), type=type))
 
-    def assert_(self, value):
-        if self.word.value == value:
+    def assert_(self, *value):
+        if self.word.value in value:
             return True
-        raise ParseException(self.line, self.column)
+        raise TokenAssertException(self.line, self.column)
 
-    def assert_type_(self, type):
-        if self.word.type == type:
+    def assert_type_(self, *type):
+        if self.word.type in type:
             return True
-        raise ParseException(self.line, self.column)
+        raise TokenAssertException(self.line, self.column)
 
-    def assert_next(self, value):
-        if self.assert_(value):
+    def assert_and_next(self, *value):
+        if self.assert_(*value):
             return self.next()
 
-    def assert_type_next(self, type):
-        if self.assert_type_(type):
+    def assert_type_and_next(self, *type):
+        if self.assert_type_(*type):
             return self.next()
 
+    def skip_space_and_assert(self, *value):
+        self.assert_type_and_next("SPACE")
+        return self.assert_(*value)
 
-class LexException(Exception):
+    def skip_space_and_assert_type(self, *type):
+        self.assert_type_and_next("SPACE")
+        return self.assert_type_(*type)
+
+
+class TokenAssertException(Exception):
     def __init__(self, line, column):
-        super(LexException, self).__init__(
+        super(TokenAssertException, self).__init__(
             "Find unexpected token, at line {line}, column {column}".format(line=line, column=column))

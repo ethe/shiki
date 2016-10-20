@@ -32,16 +32,25 @@ class Parser(Lexer):
         return result
 
     def parse_bind(self):
-        self.assert_next("let")
-        self.assert_type_next("SPACE")
-        self.assert_type_("IDENT")
+        self.next()
+        self.skip_space_and_assert_type("IDENT")
         name = self.word.value
         self.next()
-        self.assert_type_next("SPACE")
-        self.assert_next("=")
-        self.assert_type_next("SPACE")
+        self.skip_space_and_assert("=")
+        self.next()
+        self.assert_type_and_next("SPACE")
         value = self.parse_expression()
         return Bind(name, value, self.line)
+
+    def parse_call(self):
+        name = self.word.value
+        args = []
+        while not self.eof():
+            self.next()
+            self.assert_type_and_next("SPACE")
+            if self.assert_type_("INT", "FLOAT", "IDENT"):
+                args.append(self.word.value)
+        return Call(name=name, args=args)
 
 
 class ParseException(Exception):

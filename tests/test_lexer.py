@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from elanus.lexer import Lexer
+from elanus.lexer import Lexer, TokenAssertException
 from elanus.token import Token
 from elanus.scanner import ScanException
 
@@ -35,6 +35,17 @@ def test_lex_error():
         Lexer("???").next()
     except Exception as e:
         assert isinstance(e, ScanException)
+
+    lexer = Lexer("=")
+    lexer.next()
+    try:
+        lexer.assert_("!")
+    except Exception as e:
+        assert isinstance(e, TokenAssertException)
+    try:
+        lexer.assert_type_("IDENT")
+    except Exception as e:
+        assert isinstance(e, TokenAssertException)
 
 
 def test_lex_function():
