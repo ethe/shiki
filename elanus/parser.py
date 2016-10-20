@@ -48,8 +48,12 @@ class Parser(Lexer):
         while not self.eof():
             self.next()
             self.assert_type_and_next("SPACE")
-            if self.assert_type_("INT", "FLOAT", "IDENT"):
+            if self.word.type == "IDENT":
                 args.append(self.word.value)
+            elif self.word.type in ("FLOAT", "INT"):
+                args.append(self.parse_expression())
+            else:
+                raise ParseException(self.line, self.column)
         return Call(name=name, args=args)
 
 

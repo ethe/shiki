@@ -9,6 +9,11 @@ class Expressions(Node):
         super(Expressions, self).__init__(line)
         self.expressions = expressions
 
+    def __eq__(self, another):
+        if not isinstance(another, Call):
+            return False
+        return self.expressions == another.expressions
+
 
 class Expression(Node):
     def __repr__(self):
@@ -22,7 +27,9 @@ class Call(Expression):
         self.args = args
 
     def __eq__(self, another):
-        return self.name == another.name and self.args == self.args
+        if not isinstance(another, Call):
+            return False
+        return self.name == another.name and self.args == another.args
 
 
 class Bind(Expression):
@@ -31,11 +38,21 @@ class Bind(Expression):
         self.name = name
         self.value = value
 
+    def __eq__(self, another):
+        if not isinstance(another, Bind):
+            return False
+        return self.name == another.name and self.value == another.value
+
 
 class Unit(Expression):
     def __init__(self, call, line=0):
         super(Expression, self).__init__(line)
         self.call = call
+
+    def __eq__(self, another):
+        if not isinstance(another, Unit):
+            return False
+        return self.call == another.call
 
 
 class Number(Expression):
@@ -44,6 +61,8 @@ class Number(Expression):
         self.value = number
 
     def __eq__(self, another):
+        if not isinstance(another, Number):
+            return False
         return self.value == another.value
 
 

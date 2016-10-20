@@ -4,19 +4,22 @@ from elanus.ast_node import *
 
 
 def test_bind():
-    def test(node, name, value):
-        node = Parser(node).parse()
-        assert node.expressions[0].name == name
-        assert node.expressions[0].value == value
+    def test(string, node):
+        parse_result = Parser(string).parse()
+        assert parse_result.expressions[0] == node
 
-    test("\nlet foo = 1", "foo", Int("1"))
-    test("let foo = 1.1", "foo", Float("1.1"))
-
-    test("let foo = bar a 1", "foo", Call("bar", ["a", Int("1")]))
+    test("\nlet foo = 1", Bind('foo', Int('1')))
+    test("let foo = 1.1", Bind('foo', Float('1.1')))
+    test("let foo = bar a 1", Bind('foo', Call("bar", ["a", Int("1")])))
 
 
 def test_error():
     try:
         Parser("let foo = =").parse()
+    except Exception as e:
+        assert isinstance(e, ParseException)
+
+    try:
+        Parser("let foo = bar a =").parse()
     except Exception as e:
         assert isinstance(e, ParseException)
