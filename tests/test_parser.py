@@ -3,6 +3,11 @@ from elanus.parser import *
 from elanus.ast_node import *
 
 
+def base_test():
+    assert Parser("").parse() == Expressions([])
+    assert Parser("1.1").parse() == Expressions([Float("1.1")])
+
+
 def test_bind():
     def test(string, node):
         parse_result = Parser(string).parse()
@@ -16,6 +21,19 @@ def test_bind():
 def test_unit():
     expressions = Parser("foo bar (test 1 2)").parse()
     assert expressions == Expressions([Call("foo", ["bar", Unit(Call("test", [Int("1"), Int("2")]))])])
+
+
+def test_function():
+    function = """
+        func foo x y do
+          let x = 1
+          y 1
+        end
+            """
+    assert Parser(function).parse() == Expressions([Function("foo",
+                                                             ["x", "y"],
+                                                             Expressions([Bind("x", Int("1")),
+                                                                          Call("y", [Int("1")])]))])
 
 
 def test_error():

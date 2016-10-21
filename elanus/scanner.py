@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+from .token import Token
 
 
 class StringScanner(object):
@@ -22,9 +23,11 @@ class StringScanner(object):
                     yield self.word
             if not success:
                 raise ScanException(self.line, self.column)
+        self.word = Token("EOF", "", self.line, self.column)
+        yield self.word
 
     def eof(self):
-        return self.string == ""
+        return self.word.type == "EOF"
 
     def __iter__(self):
         return self.stream.__iter__()

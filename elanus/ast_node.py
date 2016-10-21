@@ -14,10 +14,31 @@ class Expressions(Node):
             return False
         return self.expressions == another.expressions
 
+    def __getitem__(self, key):
+        return self.expressions.__getitem__(key)
+
+    def __repr__(self):
+        return "<Expressions {}>".format(self.expressions)
+
 
 class Expression(Node):
     def __repr__(self):
         return "<{} {}>".format(self.__class__, self.value if hasattr(self, "value") else self.__hash__())
+
+
+class Function(Expression):
+    def __init__(self, name=None, args=[], expressions=Expressions([]), line=0):
+        self.name = name
+        self.args = args
+        self.expressions = expressions
+
+    def __eq__(self, another):
+        if not isinstance(another, Function):
+            return False
+        return self.args == another.args, self.expressions == another.expressions
+
+    def __repr__(self):
+        return "<Function {}>".format(self.name)
 
 
 class Call(Expression):
@@ -31,6 +52,9 @@ class Call(Expression):
             return False
         return self.name == another.name and self.args == another.args
 
+    def __repr__(self):
+        return "<Call {} {}>".format(self.name, self.args)
+
 
 class Bind(Expression):
     def __init__(self, name, value, line=0):
@@ -43,6 +67,9 @@ class Bind(Expression):
             return False
         return self.name == another.name and self.value == another.value
 
+    def __repr__(self):
+        return "<Bind {} {}>".format(self.name, self.value)
+
 
 class Unit(Expression):
     def __init__(self, call, line=0):
@@ -53,6 +80,9 @@ class Unit(Expression):
         if not isinstance(another, Unit):
             return False
         return self.call == another.call
+
+    def __repr__(self):
+        return "<Unit {}>".format(self.call)
 
 
 class Number(Expression):
@@ -67,8 +97,10 @@ class Number(Expression):
 
 
 class Int(Number):
-    pass
+    def __repr__(self):
+        return "<Int {}>".format(self.value)
 
 
 class Float(Number):
-    pass
+    def __repr__(self):
+        return "<Float {}>".format(self.value)

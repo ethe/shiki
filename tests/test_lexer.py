@@ -55,7 +55,7 @@ def test_lex_function():
                       Token("KEYWORD"), Token("SPACE"), Token("KEYWORD"),
                       Token("SPACE"), Token("IDENT"), Token("SPACE"),
                       Token("OPRATION"), Token("SPACE"), Token("INT"),
-                      Token("SPACE"), Token("KEYWORD")]
+                      Token("SPACE"), Token("KEYWORD"), Token("EOF")]
 
 
 def test_repr():

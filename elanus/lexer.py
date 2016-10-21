@@ -64,6 +64,12 @@ class Lexer(StringScanner):
         if self.word.type == "SPACE":
             self.next()
 
+    def safe_next(self):
+        if not self.eof():
+            self.next()
+        else:
+            raise TokenAssertException(self.line, self.column)
+
 
 class TokenAssertException(Exception):
     def __init__(self, line, column):
