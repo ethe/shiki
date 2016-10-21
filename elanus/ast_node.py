@@ -10,7 +10,7 @@ class Expressions(Node):
         self.expressions = expressions
 
     def __eq__(self, another):
-        if not isinstance(another, Call):
+        if not isinstance(another, Expressions):
             return False
         return self.expressions == another.expressions
 

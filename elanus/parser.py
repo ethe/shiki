@@ -6,11 +6,12 @@ from .ast_node import *
 class Parser(Lexer):
     def parse(self):
         expressions = []
+        line = self.line
         for token in self:
             if token.type == "SPACE" or token.type == "NEWLINE":
                 continue
             expressions.append(self.parse_expression())
-        return Expressions(expressions)
+        return Expressions(expressions, line)
 
     def parse_expression(self):
         if self.word.value == "(":
@@ -23,7 +24,7 @@ class Parser(Lexer):
             return self.parse_int()
         elif self.word.type == "IDENT":
             return self.parse_call()
-        raise ParseException(self.line, self.column)
+        raise ParseExpressionException(self.line, self.column)
 
     def parse_int(self):
         result = Int(self.word.value, self.line)
@@ -59,7 +60,7 @@ class Parser(Lexer):
             elif self.word.value == ")":
                 return Call(name=name, args=args)
             else:
-                raise ParseException(self.line, self.column)
+                raise ParseCallException(self.line, self.column)
         return Call(name=name, args=args)
 
     def parse_unit(self):
@@ -69,10 +70,25 @@ class Parser(Lexer):
             self.assert_(")")
             return Unit(call)
         else:
-            raise ParseException(self.line, self.column)
+            raise ParseUnitException(self.line, self.column)
 
 
 class ParseException(Exception):
-    def __init__(self, line, column):
+    def __init__(self, message, line, column):
         super(ParseException, self).__init__(
-            "Can not parse expression, at line {line}, column {column}".format(line=line, column=column))
+            "{message}, at line {line}, column {column}".format(message=message, line=line, column=column))
+
+
+class ParseExpressionException(ParseException):
+    def __init__(self, line, column):
+        super(ParseExpressionException, self).__init__("Can not parse expression", line, column)
+
+
+class ParseCallException(ParseException):
+    def __init__(self, line, column):
+        super(ParseCallException, self).__init__("Can not parse function call", line, column)
+
+
+class ParseUnitException(ParseException):
+    def __init__(self, line, column):
+        super(ParseUnitException, self).__init__("Can not parse unit", line, column)
