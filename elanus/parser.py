@@ -13,7 +13,9 @@ class Parser(Lexer):
         return Expressions(expressions)
 
     def parse_expression(self):
-        if self.word.value == "let":
+        if self.word.value == "(":
+            return self.parse_unit()
+        elif self.word.value == "let":
             return self.parse_bind()
         elif self.word.type == "FLOAT":
             return self.parse_float()
@@ -47,14 +49,27 @@ class Parser(Lexer):
         args = []
         while not self.eof():
             self.next()
-            self.assert_type_and_next("SPACE")
+            self.skip_space()
             if self.word.type == "IDENT":
                 args.append(self.word.value)
             elif self.word.type in ("FLOAT", "INT"):
                 args.append(self.parse_expression())
+            elif self.word.value == "(":
+                args.append(self.parse_expression())
+            elif self.word.value == ")":
+                return Call(name=name, args=args)
             else:
                 raise ParseException(self.line, self.column)
         return Call(name=name, args=args)
+
+    def parse_unit(self):
+        self.next()
+        call = self.parse_expression()
+        if not isinstance(call, Bind):
+            self.assert_(")")
+            return Unit(call)
+        else:
+            raise ParseException(self.line, self.column)
 
 
 class ParseException(Exception):

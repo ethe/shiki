@@ -60,6 +60,10 @@ class Lexer(StringScanner):
         self.assert_type_and_next("SPACE")
         return self.assert_type_(*type)
 
+    def skip_space(self):
+        if self.word.type == "SPACE":
+            self.next()
+
 
 class TokenAssertException(Exception):
     def __init__(self, line, column):

@@ -13,6 +13,11 @@ def test_bind():
     test("let foo = bar a 1", Bind('foo', Call("bar", ["a", Int("1")])))
 
 
+def test_unit():
+    expressions = Parser("foo bar (test 1 2)").parse()
+    assert expressions.expressions[0] == Call("foo", ["bar", Unit(Call("test", [Int("1"), Int("2")]))])
+
+
 def test_error():
     try:
         Parser("let foo = =").parse()
