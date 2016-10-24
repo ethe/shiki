@@ -35,7 +35,7 @@ class Function(Expression):
     def __eq__(self, another):
         if not isinstance(another, Function):
             return False
-        return self.args == another.args, self.expressions == another.expressions
+        return self.name == another.name and self.args == another.args and self.expressions == another.expressions
 
     def __repr__(self):
         return "<Function {}>".format(self.name)
@@ -72,7 +72,7 @@ class Bind(Expression):
 
 
 class Unit(Expression):
-    def __init__(self, call, line=0):
+    def __init__(self, call=None, line=0):
         super(Expression, self).__init__(line)
         self.call = call
 
@@ -104,3 +104,30 @@ class Int(Number):
 class Float(Number):
     def __repr__(self):
         return "<Float {}>".format(self.value)
+
+
+class Return(Expression):
+    def __init__(self, expression, line=0):
+        self.expression = expression
+        self.line = line
+
+    def __repr__(self):
+        return "<Return {}>".format(self.expression)
+
+    def __eq__(self, another):
+        if isinstance(another, Return):
+            return self.expression == self.expression
+        return False
+
+
+class Void(Expression):
+    def __init__(self, line=0):
+        self.line = line
+
+    def __repr__(self):
+        return "<Void void>"
+
+    def __eq__(self, another):
+        if isinstance(another, Void):
+            return True
+        return False

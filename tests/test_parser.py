@@ -22,6 +22,9 @@ def test_unit():
     expressions = Parser("foo bar (test 1 2)").parse()
     assert expressions == Expressions([Call("foo", ["bar", Unit(Call("test", [Int("1"), Int("2")]))])])
 
+    expressions = Parser("foo ()").parse()
+    assert expressions == Expressions([Call('foo', [Unit(Void())])])
+
 
 def test_function():
     function = """
@@ -29,11 +32,20 @@ def test_function():
           let x = 1
           y 1
         end
-            """
+    """
     assert Parser(function).parse() == Expressions([Function("foo",
                                                              ["x", "y"],
                                                              Expressions([Bind("x", Int("1")),
                                                                           Call("y", [Int("1")])]))])
+
+    function = """
+        func foo n do
+          func bar m do
+            return + n m
+          end
+        end
+    """
+    assert Parser(function).parse() == Expressions([Function('foo', ['n'], Expressions([Function('bar', ['m'], Expressions([Return(Call('+', ['n', 'm']))]))]))])
 
 
 def test_error():

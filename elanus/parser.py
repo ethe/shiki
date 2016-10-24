@@ -5,16 +5,16 @@ from .ast_node import *
 
 class Parser(Lexer):
     def parse(self):
-        for token in self:
-            if token.type == "SPACE" or token.type == "NEWLINE":
-                continue
-            return self.parse_expressions()
+        self.next()
+        while self.word.type in ("SPACE", "NEWLINE"):
+            self.next()
+        return self.parse_expressions()
 
-    def parse_expressions(self):
+    def parse_expressions(self, inside=False):
         line = self.line
         expressions = []
         while not self.eof() and self.word.value != "end":
-            expressions.append(self.parse_expression())
+            expressions.append(self.parse_expression(inside=inside))
             if self.eof() and self.word.value != "end":
                 break
             self.safe_next()
@@ -22,19 +22,23 @@ class Parser(Lexer):
                 self.safe_next()
         return Expressions(expressions, line)
 
-    def parse_expression(self):
+    def parse_expression(self, inside=False):
         self.skip_space()
         if self.word.value == "(":
             return self.parse_unit()
+        elif self.word.value == ")":
+            return self.parse_void()
         elif self.word.value == "let":
             return self.parse_bind()
         elif self.word.value == "func":
             return self.parse_function()
+        elif self.word.value == "return":
+            return self.parse_return(inside=inside)
         elif self.word.type == "FLOAT":
             return self.parse_float()
         elif self.word.type == "INT":
             return self.parse_int()
-        elif self.word.type == "IDENT":
+        elif self.word.type == "IDENT" or self.word.value in ("+", "-", "*", "/"):
             return self.parse_call()
         raise ParseExpressionException(self.line, self.column)
 
@@ -103,12 +107,26 @@ class Parser(Lexer):
                     raise ParseFunctionException(self.line, self.column)
             self.safe_next()
             self.assert_type_and_next("SPACE", "NEWLINE")
-            expressions = self.parse_expressions()
+            expressions = self.parse_expressions(inside=True)
             self.skip_space()
             self.assert_and_next("end")
             return Function(name, args, expressions, line)
         else:
             raise ParseFunctionException(self.line, self.column)
+
+    def parse_return(self, inside):
+        line, column = self.line, self.column
+        self.safe_next()
+        if inside:
+            expression = self.parse_expression()
+            if isinstance(expression, Bind):
+                raise ParseReturnException("Bind has not a return", line, column)
+            return Return(expression, line)
+        else:
+            raise ParseReturnException("Return outside function", line, column)
+
+    def parse_void(self):
+        return Void(self.line)
 
 
 class ParseException(Exception):
@@ -135,3 +153,8 @@ class ParseUnitException(ParseException):
 class ParseFunctionException(ParseException):
     def __init__(self, line, column):
         super(ParseFunctionException, self).__init__("Can not parse function", line, column)
+
+
+class ParseReturnException(ParseException):
+    def __init__(self, message, line, column):
+        super(ParseReturnException, self).__init__(message, line, column)
