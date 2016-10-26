@@ -15,7 +15,7 @@ class Parser(Lexer):
         expressions = []
         while not self.eof() and self.word.value != "end":
             expressions.append(self.parse_expression(inside=inside))
-            if self.eof() and self.word.value != "end":
+            if self.eof() or self.word.value == "end":
                 break
             self.safe_next()
             while self.word.type in ("NEWLINE", "SPACE"):
@@ -120,7 +120,7 @@ class Parser(Lexer):
         if inside:
             expression = self.parse_expression()
             if isinstance(expression, Bind):
-                raise ParseReturnException("Bind has not a return", line, column)
+                raise ParseReturnException("Binding does not have a return", line, column)
             return Return(expression, line)
         else:
             raise ParseReturnException("Return outside function", line, column)

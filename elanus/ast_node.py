@@ -97,11 +97,17 @@ class Number(Expression):
 
 
 class Int(Number):
+    def __init__(self, number, line=0):
+        super(Int, self).__init__(int(number), line)
+
     def __repr__(self):
         return "<Int {}>".format(self.value)
 
 
 class Float(Number):
+    def __init__(self, number, line=0):
+        super(Float, self).__init__(float(number), line)
+
     def __repr__(self):
         return "<Float {}>".format(self.value)
 
