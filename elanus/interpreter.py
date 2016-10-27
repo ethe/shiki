@@ -16,12 +16,9 @@ class Interpreter(object):
 
         for expression in expressions:
             result = self.interpret_expression(expression, heap)
-            if isinstance(result, tuple):
-                if result[0] == "return":
-                    return result[1]
-                heap.insert(0, result)
-            else:
-                heap.insert(0, ('', result))
+            if result[0] == "return":
+                return result[1]
+            heap.insert(0, result)
         return heap
 
     def interpret_expression(self, expression, environment=[]):
@@ -41,7 +38,7 @@ class Interpreter(object):
             return self.interpret_return(expression, stack)
 
     def interpret_bind(self, bind, environment):
-        return (bind.name, self.interpret_expression(bind.value, environment))
+        return (bind.name, self.interpret_expression(bind.value, environment)[1])
 
     def interpret_define(self, function, environment):
         return (function.name, Closure(function, environment))
@@ -61,10 +58,10 @@ class Interpreter(object):
             return ('', value)
 
     def interpret_int(self, integer):
-        return integer.value
+        return ('', integer.value)
 
     def interpret_float(self, float):
-        return float.value
+        return ('', float.value)
 
     def interpret_return(self, exreturn, environment=[]):
         if isinstance(exreturn, Closure):
