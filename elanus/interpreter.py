@@ -12,7 +12,7 @@ class Interpreter(object):
         return self.interpret_expressions(self.ast_tree)
 
     def interpret_expressions(self, expressions=[], environment=[], inside=False):
-        heap = Environment(deepcopy(environment))
+        heap = Environment(environment)
 
         for expression in expressions:
             result = self.interpret_expression(expression, heap)
@@ -23,7 +23,7 @@ class Interpreter(object):
             heap.insert(0, result)
 
     def interpret_expression(self, expression, environment=[]):
-        stack = Environment(deepcopy(environment))
+        stack = Environment(environment)
 
         if isinstance(expression, Bind):
             return self.interpret_bind(expression, stack)
@@ -39,6 +39,8 @@ class Interpreter(object):
             return self.interpret_return(expression, stack)
         elif isinstance(expression, Nil):
             return self.interpret_nil(expression)
+        elif isinstance(expression, Unit):
+            return self.interpret_unit(expression)
 
     def interpret_bind(self, bind, environment):
         return (bind.name, self.interpret_expression(bind.value, environment)[1])
@@ -53,14 +55,16 @@ class Interpreter(object):
             environment = value.environment
             arg_name_index = 0
             for arg in call.args:
-                environment[function.args[arg_name_index]] = environment[arg]
+                value = environment[arg] if isinstance(arg, str) else self.interpret_expression(arg, environment)[1]
+                environment[function.args[arg_name_index]] = value
                 arg_name_index += 1
             result = self.interpret_expressions(function.expressions, environment, inside=True)
             if not result:
                 return self.interpret_expression(Nil())
             return result
+        elif isinstance(value, Call):
+            return self.interpret_expression(value, environment)
         else:
-            value = environment[call.name]
             return ('', value)
 
     def interpret_int(self, integer):
@@ -78,6 +82,9 @@ class Interpreter(object):
     def interpret_nil(self, nil):
         return ('', Nil())
 
+    def interpret_unit(self, unit):
+        return ('', unit.call)
+
 
 class Closure(object):
     def __init__(self, function, environment):
@@ -90,7 +97,7 @@ class Closure(object):
 
 class Environment(list):
     def __init__(self, evironment=[]):
-        super(Environment, self).__init__(deepcopy(evironment))
+        super(Environment, self).__init__(evironment)
 
     def __getitem__(self, key):
         for pair in self.__iter__():

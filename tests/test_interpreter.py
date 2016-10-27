@@ -6,11 +6,28 @@ def test_interpret():
     program = """
         let a = 1
 
-        func foo b do
-          return b
+        func foo do
+          let a = 1.1
+          return a
         end
 
-        let bar = foo a
+        func bar n do
+          return n
+        end
+
+        let bar = bar foo
+        a
         let nil_value = nil
+
+        func bar n do
+          return n
+        end
+
+        func foo n do
+          return n
+        end
+
+        let a = foo (bar 1)
+        a
     """
     Interpreter(program).run()
