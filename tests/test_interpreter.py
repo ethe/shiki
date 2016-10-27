@@ -5,9 +5,12 @@ from elanus.interpreter import Interpreter
 def test_interpret():
     program = """
         let a = 1
-        func foo do
-          return a
+
+        func foo b do
+          return b
         end
-        let bar = foo
+
+        let bar = foo a
+        let nil_value = nil
     """
     Interpreter(program).run()

@@ -51,7 +51,7 @@ class Interpreter(object):
         if isinstance(value, Closure):
             function = value.function
             environment = value.environment
-            arg_name_index = 1
+            arg_name_index = 0
             for arg in call.args:
                 environment[function.args[arg_name_index]] = environment[arg]
                 arg_name_index += 1
