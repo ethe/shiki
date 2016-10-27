@@ -11,15 +11,16 @@ class Interpreter(object):
     def run(self):
         return self.interpret_expressions(self.ast_tree)
 
-    def interpret_expressions(self, expressions=[], environment=[]):
+    def interpret_expressions(self, expressions=[], environment=[], inside=False):
         heap = Environment(deepcopy(environment))
 
         for expression in expressions:
             result = self.interpret_expression(expression, heap)
             if result[0] == "return":
                 return result[1]
+            if not inside:
+                print result[1]
             heap.insert(0, result)
-        return heap
 
     def interpret_expression(self, expression, environment=[]):
         stack = Environment(deepcopy(environment))
@@ -36,6 +37,8 @@ class Interpreter(object):
             return self.interpret_float(expression)
         elif isinstance(expression, Return):
             return self.interpret_return(expression, stack)
+        elif isinstance(expression, Nil):
+            return self.interpret_nil(expression)
 
     def interpret_bind(self, bind, environment):
         return (bind.name, self.interpret_expression(bind.value, environment)[1])
@@ -52,7 +55,10 @@ class Interpreter(object):
             for arg in call.args:
                 environment[function.args[arg_name_index]] = environment[arg]
                 arg_name_index += 1
-            return self.interpret_expressions(function.expressions, environment)
+            result = self.interpret_expressions(function.expressions, environment, inside=True)
+            if not result:
+                return self.interpret_expression(Nil())
+            return result
         else:
             value = environment[call.name]
             return ('', value)
@@ -68,6 +74,9 @@ class Interpreter(object):
             return ("return", self.interpret_expression(exreturn.function.expression, environment))
         else:
             return ("return", self.interpret_expression(exreturn.expression, environment))
+
+    def interpret_nil(self, nil):
+        return ('', Nil())
 
 
 class Closure(object):

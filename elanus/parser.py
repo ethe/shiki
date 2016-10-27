@@ -28,6 +28,8 @@ class Parser(Lexer):
             return self.parse_unit()
         elif self.word.value == ")":
             return self.parse_void()
+        elif self.word.value == "nil":
+            return self.parse_nil()
         elif self.word.value == "let":
             return self.parse_bind()
         elif self.word.value == "func":
@@ -127,6 +129,11 @@ class Parser(Lexer):
 
     def parse_void(self):
         return Void(self.line)
+
+    def parse_nil(self):
+        result = Nil(self.line)
+        self.safe_next()
+        return result
 
 
 class ParseException(Exception):

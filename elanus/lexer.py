@@ -12,7 +12,7 @@ class Lexer(StringScanner):
             ("float",        r"\d+\.\d+"),
             ("int",          r"\d+"),
             ("opration",     r"\+|-|\*|\/|=|==|>|<|\"|\'|\(|\)|\[|\]|\||,"),
-            ("keyword",      r"(let|func|do|end|return|and|or|not|true|false)\b"),
+            ("keyword",      r"(let|func|do|end|return|and|or|not|true|false|nil)\b"),
             ("ident",        r"[a-zA-Z_][a-zA-Z_0-9]*(\?|!)?")
         ]
 

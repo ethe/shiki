@@ -137,3 +137,16 @@ class Void(Expression):
         if isinstance(another, Void):
             return True
         return False
+
+
+class Nil(Expression):
+    def __init__(self, line=0):
+        self.line = line
+
+    def __repr__(self):
+        return '<Nil nil>'
+
+    def __eq__(self, another):
+        if isinstance(another, Void):
+            return True
+        return False
