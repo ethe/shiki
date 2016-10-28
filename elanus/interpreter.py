@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
+from functools import partial
 from .parser import Parser
 from .ast_node import *
+from recursion_optimize import trampoline
 
 
 class Interpreter(object):
@@ -15,9 +16,10 @@ class Interpreter(object):
         heap = Environment(environment)
 
         for expression in expressions:
-            result = self.interpret_expression(expression, heap)
-            if result[0] == "return":
-                return result[1]
+            if isinstance(expression, Return):
+                # import wdb; wdb.set_trace()
+                return self.interpret_expression(expression, heap)
+            result = trampoline(self.interpret_expression)(expression, heap)
             if not inside:
                 print result[1]
             heap.insert(0, result)
@@ -45,7 +47,7 @@ class Interpreter(object):
             return self.interpret_unit(expression)
 
     def interpret_bind(self, bind, environment):
-        return (bind.name, self.interpret_expression(bind.value, environment)[1])
+        return (bind.name, trampoline(self.interpret_expression)(bind.value, environment)[1])
 
     def interpret_define(self, function, environment):
         environment[function.name] = Closure(function, environment)
@@ -58,12 +60,15 @@ class Interpreter(object):
             environment = value.environment
             arg_name_index = 0
             for arg in call.args:
-                arg_value = environment[arg] if isinstance(arg, str) else self.interpret_expression(arg, environment)[1]
+                if isinstance(arg, str):
+                    arg_value = environment[arg]
+                else:
+                    arg_value = trampoline(self.interpret_expression)(arg, environment)[1]
                 environment[function.args[arg_name_index]] = arg_value
                 arg_name_index += 1
             return self.interpret_expressions(function.expressions, environment, inside=True)
         elif isinstance(value, Call):
-            return self.interpret_expression(value, environment)
+            return trampoline(self.interpret_expression)(value, environment)
         else:
             return ('', value)
 
@@ -75,9 +80,9 @@ class Interpreter(object):
 
     def interpret_return(self, exreturn, environment=[]):
         if isinstance(exreturn, Closure):
-            return ("return", self.interpret_expression(exreturn.function.expression, environment))
+            return partial(self.interpret_expression, exreturn.function.expression, environment)
         else:
-            return ("return", self.interpret_expression(exreturn.expression, environment))
+            return partial(self.interpret_expression, exreturn.expression, environment)
 
     def interpret_nil(self, nil):
         return ('', Nil())
