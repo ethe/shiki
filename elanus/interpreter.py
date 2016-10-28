@@ -48,6 +48,7 @@ class Interpreter(object):
         return (bind.name, self.interpret_expression(bind.value, environment)[1])
 
     def interpret_define(self, function, environment):
+        environment[function.name] = Closure(function, environment)
         return (function.name, Closure(function, environment))
 
     def interpret_call(self, call, environment):

@@ -28,6 +28,5 @@ def test_interpret():
         end
 
         let a = foo (bar 1)
-        a
     """
     Interpreter(program).run()
