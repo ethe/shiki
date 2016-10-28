@@ -21,6 +21,8 @@ class Interpreter(object):
             if not inside:
                 print result[1]
             heap.insert(0, result)
+        if inside:
+            return self.interpret_expression(Nil())
 
     def interpret_expression(self, expression, environment=[]):
         stack = Environment(environment)
@@ -55,13 +57,10 @@ class Interpreter(object):
             environment = value.environment
             arg_name_index = 0
             for arg in call.args:
-                value = environment[arg] if isinstance(arg, str) else self.interpret_expression(arg, environment)[1]
-                environment[function.args[arg_name_index]] = value
+                arg_value = environment[arg] if isinstance(arg, str) else self.interpret_expression(arg, environment)[1]
+                environment[function.args[arg_name_index]] = arg_value
                 arg_name_index += 1
-            result = self.interpret_expressions(function.expressions, environment, inside=True)
-            if not result:
-                return self.interpret_expression(Nil())
-            return result
+            return self.interpret_expressions(function.expressions, environment, inside=True)
         elif isinstance(value, Call):
             return self.interpret_expression(value, environment)
         else:
