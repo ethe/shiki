@@ -57,7 +57,8 @@ class Interpreter(object):
         value = environment[call.name]
         if isinstance(value, Closure):
             function = value.function
-            environment = value.environment
+            # import wdb; wdb.set_trace()
+            environment = value.environment + environment
             arg_name_index = 0
             for arg in call.args:
                 if isinstance(arg, str):
@@ -103,6 +104,10 @@ class Closure(object):
 class Environment(list):
     def __init__(self, evironment=[]):
         super(Environment, self).__init__(evironment)
+
+    def __add__(self, another):
+        environment = super(Environment, self).__add__(another)
+        return Environment(environment)
 
     def __getitem__(self, key):
         for pair in self.__iter__():
