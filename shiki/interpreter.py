@@ -2,7 +2,7 @@
 from functools import partial
 from .parser import Parser
 from .ast_node import *
-from recursion_optimize import trampoline
+from .utils.tail_call_optimize import trampoline
 
 
 class Interpreter(object):
@@ -57,7 +57,6 @@ class Interpreter(object):
         value = environment[call.name]
         if isinstance(value, Closure):
             function = value.function
-            # import wdb; wdb.set_trace()
             environment = value.environment + environment
             arg_name_index = 0
             for arg in call.args:
@@ -69,7 +68,7 @@ class Interpreter(object):
                 arg_name_index += 1
             return self.interpret_expressions(function.expressions, environment, inside=True)
         elif isinstance(value, Call):
-            return trampoline(self.interpret_expression)(value, environment)
+            return partial(self.interpret_expression, value, environment)
         else:
             return ('', value)
 
