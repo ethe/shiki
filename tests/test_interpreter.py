@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from elanus.interpreter import Interpreter
+from shiki.interpreter import Interpreter
 
 
 def test_interpret():

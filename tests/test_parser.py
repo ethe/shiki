@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from elanus.parser import *
-from elanus.ast_node import *
+from shiki.parser import *
+from shiki.ast_node import *
 
 
 def base_test():
