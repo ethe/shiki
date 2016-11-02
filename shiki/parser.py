@@ -22,7 +22,7 @@ class Parser(Lexer):
                 self.safe_next()
         return Expressions(expressions, line)
 
-    def parse_expression(self, inside=False):
+    def parse_expression(self, inside=False, unit_inside=False):
         self.skip_space()
         if self.word.value == "(":
             return self.parse_unit()
@@ -41,7 +41,7 @@ class Parser(Lexer):
         elif self.word.type == "INT":
             return self.parse_int()
         elif self.word.type == "IDENT" or self.word.value in ("+", "-", "*", "/"):
-            return self.parse_call()
+            return self.parse_call(unit_inside=unit_inside)
         raise ParseExpressionException(self.line, self.column)
 
     def parse_int(self):
@@ -65,7 +65,7 @@ class Parser(Lexer):
         value = self.parse_expression()
         return Bind(name, value, self.line)
 
-    def parse_call(self):
+    def parse_call(self, unit_inside=False):
         name = self.word.value
         args = []
         self.safe_next()
@@ -76,7 +76,9 @@ class Parser(Lexer):
                 self.safe_next()
             elif self.word.type in ("FLOAT", "INT") or self.word.value == "(":
                 args.append(self.parse_expression())
-            elif self.word.value in (")", "end", "\n") or self.eof():
+            elif self.word.value in ("end", "\n") or self.eof():
+                break
+            elif unit_inside and self.word.value == ")":
                 break
             else:
                 raise ParseCallException(self.line, self.column)
@@ -84,9 +86,9 @@ class Parser(Lexer):
 
     def parse_unit(self):
         self.next()
-        call = self.parse_expression()
+        call = self.parse_expression(unit_inside=True)
         if not isinstance(call, Bind):
-            self.assert_(")")
+            self.assert_and_next(")")
             return Unit(call)
         else:
             raise ParseUnitException(self.line, self.column)

@@ -101,8 +101,8 @@ class Closure(object):
 
 
 class Environment(list):
-    def __init__(self, evironment=[]):
-        super(Environment, self).__init__(evironment)
+    def __init__(self, environment=[]):
+        super(Environment, self).__init__(environment)
 
     def __add__(self, another):
         environment = super(Environment, self).__add__(another)
