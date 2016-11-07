@@ -56,13 +56,15 @@ class Interpreter(object):
 
     def interpret_call(self, call, environment):
         if is_builtin(call):
+            call_args = []
             for arg in call.args:
-                call_args = []
-                for arg in call.args:
-                    if isinstance(arg, str):
-                        call_args.append(environment[arg])
-                    else:
-                        call_args.append(trampoline(self.interpret_expression)(arg, environment)[1])
+                if isinstance(arg, str):
+                    call_args.append(environment[arg])
+                else:
+                    node = trampoline(self.interpret_expression)(arg, environment)[1]
+                    if isinstance(node, Call):
+                        node = trampoline(self.interpret_expression)(node, environment)[1]
+                    call_args.append(node)
             return ('', arithmetic(call.name, *call_args))
 
         value = environment[call.name]
