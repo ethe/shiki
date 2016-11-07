@@ -9,8 +9,8 @@ class Lexer(StringScanner):
         return [
             ("newline",      r"\n"),
             ("space",        r"\s+"),
-            ("float",        r"\d+\.\d+"),
-            ("int",          r"\d+"),
+            ("float",        r"[\+\-]?\d+\.\d+"),
+            ("int",          r"[\+\-]?\d+"),
             ("opration",     r"\+|-|\*|\/|=|==|>|<|\"|\'|\(|\)|\[|\]|\||,"),
             ("keyword",      r"(let|func|do|end|return|and|or|not|true|false|nil)\b"),
             ("ident",        r"[a-zA-Z_][a-zA-Z_0-9]*(\?|!)?")
