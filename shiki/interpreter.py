@@ -3,6 +3,8 @@ from functools import partial
 from .parser import Parser
 from .ast_node import *
 from .utils.tail_call_optimize import trampoline
+from .builtin import is_builtin
+from .builtin.arithmetic import arithmetic
 
 
 class Interpreter(object):
@@ -17,7 +19,6 @@ class Interpreter(object):
 
         for expression in expressions:
             if isinstance(expression, Return):
-                # import wdb; wdb.set_trace()
                 return self.interpret_expression(expression, heap)
             result = trampoline(self.interpret_expression)(expression, heap)
             if not inside:
@@ -54,6 +55,16 @@ class Interpreter(object):
         return (function.name, Closure(function, environment))
 
     def interpret_call(self, call, environment):
+        if is_builtin(call):
+            for arg in call.args:
+                call_args = []
+                for arg in call.args:
+                    if isinstance(arg, str):
+                        call_args.append(environment[arg])
+                    else:
+                        call_args.append(trampoline(self.interpret_expression)(arg, environment)[1])
+            return ('', arithmetic(call.name, *call_args))
+
         value = environment[call.name]
         if isinstance(value, Closure):
             function = value.function
