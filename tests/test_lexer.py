@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from shiki.lexer import Lexer, TokenAssertException
-from shiki.token import Token
-from shiki.scanner import ScanException
+from src.lexer import Lexer, TokenAssertException
+from src.token import Token
+from src.scanner import ScanException
 
 
 def test_lex_int():

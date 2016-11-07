@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from shiki.interpreter import Interpreter
+from src.interpreter import Interpreter
 
 
 def test_interpret():

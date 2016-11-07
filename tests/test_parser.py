@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from shiki.parser import *
-from shiki.ast_node import *
+from src.parser import *
+from src.ast_node import *
 
 
 def base_test():
