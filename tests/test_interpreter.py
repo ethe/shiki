@@ -28,11 +28,5 @@ def test_interpret():
         end
 
         let a = foo (bar 1)
-
-        let a = 1.1
-        - 1 a
-        + 1 a
-        * 1 a
-        / 1 a
     """
     Interpreter(program).run()
