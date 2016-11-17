@@ -18,14 +18,12 @@ class Interpreter(object):
         heap = Environment(environment)
 
         for expression in expressions:
+            result = self.trace(trampoline(self.interpret_expression)(expression, heap), inside=inside)
             if isinstance(expression, Return):
-                return self.interpret_expression(expression, heap)
-            result = trampoline(self.interpret_expression)(expression, heap)
-            if not inside:
-                print result[1]
-            heap.insert(0, result)
-        if inside:
-            return self.interpret_expression(Nil())
+                return result
+            elif isinstance(expression, Function) or isinstance(expression, Bind):
+                heap.insert(0, (expression.name, result))
+        return self.interpret_expression(Nil())
 
     def interpret_expression(self, expression, environment=[]):
         stack = Environment(environment)
@@ -48,11 +46,11 @@ class Interpreter(object):
             return self.interpret_unit(expression)
 
     def interpret_bind(self, bind, environment):
-        return (bind.name, trampoline(self.interpret_expression)(bind.value, environment)[1])
+        return trampoline(self.interpret_expression)(bind.value, environment)
 
     def interpret_define(self, function, environment):
         environment[function.name] = Closure(function, environment)
-        return (function.name, Closure(function, environment))
+        return Closure(function, environment)
 
     def interpret_call(self, call, environment):
         if is_builtin(call):
@@ -61,11 +59,11 @@ class Interpreter(object):
                 if isinstance(arg, str):
                     call_args.append(environment[arg])
                 else:
-                    node = trampoline(self.interpret_expression)(arg, environment)[1]
+                    node = trampoline(self.interpret_expression)(arg, environment)
                     if isinstance(node, Call):
-                        node = trampoline(self.interpret_expression)(node, environment)[1]
+                        node = trampoline(self.interpret_expression)(node, environment)
                     call_args.append(node)
-            return ('', arithmetic(call.name, *call_args))
+            return arithmetic(call.name, *call_args)
 
         value = environment[call.name]
         if isinstance(value, Closure):
@@ -75,21 +73,23 @@ class Interpreter(object):
             for arg in call.args:
                 if isinstance(arg, str):
                     arg_value = environment[arg]
+                elif isinstance(arg, Unit):
+                    arg_value = self.interpret_expression(arg)
                 else:
-                    arg_value = trampoline(self.interpret_expression)(arg, environment)[1]
+                    arg_value = arg
                 environment[function.args[arg_name_index]] = arg_value
                 arg_name_index += 1
             return self.interpret_expressions(function.expressions, environment, inside=True)
         elif isinstance(value, Call):
             return partial(self.interpret_expression, value, environment)
         else:
-            return ('', value)
+            return value
 
     def interpret_int(self, integer):
-        return ('', integer.value)
+        return integer.value
 
     def interpret_float(self, float):
-        return ('', float.value)
+        return float.value
 
     def interpret_return(self, exreturn, environment=[]):
         if isinstance(exreturn, Closure):
@@ -98,19 +98,18 @@ class Interpreter(object):
             return partial(self.interpret_expression, exreturn.expression, environment)
 
     def interpret_nil(self, nil):
-        return ('', Nil())
+        return Nil()
 
     def interpret_unit(self, unit):
-        return ('', unit.call)
+        return unit.call
 
-
-class Closure(object):
-    def __init__(self, function, environment):
-        self.function = function
-        self.environment = environment
-
-    def __repr__(self):
-        return "<Closure {}>".format(self.function.name)
+    def trace(self, expression, inside):
+        if not inside:
+            if isinstance(expression, tuple):
+                print expression[1]
+            else:
+                print expression
+        return expression
 
 
 class Environment(list):

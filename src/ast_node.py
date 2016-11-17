@@ -144,9 +144,18 @@ class Nil(Expression):
         self.line = line
 
     def __repr__(self):
-        return '<Nil nil>'
+        return '<nil>'
 
     def __eq__(self, another):
         if isinstance(another, Void):
             return True
         return False
+
+
+class Closure(object):
+    def __init__(self, function, environment):
+        self.function = function
+        self.environment = environment
+
+    def __repr__(self):
+        return "<Closure {}>".format(self.function.name)
