@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from src.ast_node import *
+from src.ast_node import BuiltinFunction, Number
 
 
 class Add(BuiltinFunction):

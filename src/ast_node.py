@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from utils.singleton import Singleton
+
+
 class Node(object):
     def __init__(self, line=0):
         self.line = line
@@ -136,17 +139,41 @@ class Void(Expression):
         return False
 
 
-class Nil(Expression):
+class Nil(Singleton, Expression):
     def __init__(self, line=0):
         self.line = line
 
     def __repr__(self):
-        return '<nil>'
+        return 'nil'
 
     def __eq__(self, another):
-        if isinstance(another, Void):
-            return True
-        return False
+        return self is another
+
+
+class Bool(Singleton, Expression):
+    def __init__(self, line=0):
+        self.line = line
+
+    def __eq__(self, another):
+        return self is another
+
+
+class TrueType(Bool):
+    def __init__(self, line=0):
+        super(TrueType, self).__init__(line=line)
+        self.value = True
+
+    def __repr__(self):
+        return "true"
+
+
+class FalseType(Bool):
+    def __init__(self, line=0):
+        super(FalseType, self).__init__(line=line)
+        self.value = False
+
+    def __repr__(self):
+        return "false"
 
 
 class Closure(object):

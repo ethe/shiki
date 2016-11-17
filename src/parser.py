@@ -30,6 +30,8 @@ class Parser(Lexer):
             return self.parse_void()
         elif self.word.value == "nil":
             return self.parse_nil()
+        elif self.word.value in ["true", "false"]:
+            return self.parse_bool()
         elif self.word.value == "let":
             return self.parse_bind()
         elif self.word.value == "func":
@@ -40,7 +42,7 @@ class Parser(Lexer):
             return self.parse_float()
         elif self.word.type == "INT":
             return self.parse_int()
-        elif self.word.type == "IDENT" or self.word.value in ("+", "-", "*", "/"):
+        elif self.word.type == "IDENT" or self.word.value in ("+", "-", "*", "/", "and", "or", "not"):
             return self.parse_call(unit_inside=unit_inside)
         raise ParseExpressionException(self.line, self.column)
 
@@ -74,7 +76,7 @@ class Parser(Lexer):
             if self.word.type == "IDENT":
                 args.append(self.word.value)
                 self.safe_next()
-            elif self.word.type in ("FLOAT", "INT") or self.word.value == "(":
+            elif self.word.type in ("FLOAT", "INT") or self.word.value in ["(", "true", "false"]:
                 args.append(self.parse_expression())
             elif self.word.value in ("end", "\n") or self.eof():
                 break
@@ -85,7 +87,7 @@ class Parser(Lexer):
         return Call(name=name, args=args)
 
     def parse_unit(self):
-        self.next()
+        self.safe_next()
         call = self.parse_expression(unit_inside=True)
         if not isinstance(call, Bind):
             self.assert_and_next(")")
@@ -134,6 +136,15 @@ class Parser(Lexer):
 
     def parse_nil(self):
         result = Nil(self.line)
+        self.safe_next()
+        return result
+
+    def parse_bool(self):
+        line = self.line
+        if self.word.value == "true":
+            result = TrueType(line)
+        elif self.word.value == "false":
+            result = FalseType(line)
         self.safe_next()
         return result
 

@@ -45,6 +45,8 @@ class Interpreter(object):
             return self.interpret_nil(expression)
         elif isinstance(expression, Unit):
             return self.interpret_unit(expression)
+        elif isinstance(expression, Bool):
+            return self.interpret_bool(expression)
 
     def interpret_bind(self, bind, environment):
         return trampoline(self.interpret_expression)(bind.value, environment)
@@ -93,10 +95,13 @@ class Interpreter(object):
             return partial(self.interpret_expression, exreturn.expression, environment)
 
     def interpret_nil(self, nil):
-        return Nil()
+        return nil
 
     def interpret_unit(self, unit):
         return unit.call
+
+    def interpret_bool(self, bool_value):
+        return bool_value
 
     def trace(self, expression, inside):
         if not inside:
