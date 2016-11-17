@@ -35,4 +35,5 @@ def test_interpret():
         * 1 a
         / 1 a
     """
-    Interpreter(program).run()
+
+    Interpreter(program).interpret()

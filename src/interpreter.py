@@ -3,26 +3,27 @@ from functools import partial
 from .parser import Parser
 from .ast_node import *
 from .utils.tail_call_optimize import trampoline
-from .builtin import is_builtin
-from .builtin.arithmetic import arithmetic
+from .builtin import builtin_init
 
 
 class Interpreter(object):
     def __init__(self, string):
         self.ast_tree = Parser(string).parse()
 
-    def run(self):
-        return self.interpret_expressions(self.ast_tree)
+    def interpret(self):
+        environment = Environment(builtin_init())
+        return self.interpret_expressions(self.ast_tree, environment)
 
     def interpret_expressions(self, expressions=[], environment=[], inside=False):
         heap = Environment(environment)
 
         for expression in expressions:
-            result = self.trace(trampoline(self.interpret_expression)(expression, heap), inside=inside)
             if isinstance(expression, Return):
-                return result
-            elif isinstance(expression, Function) or isinstance(expression, Bind):
-                heap.insert(0, (expression.name, result))
+                return self.trace(self.interpret_expression(expression, heap), inside=inside)
+            else:
+                result = self.trace(trampoline(self.interpret_expression)(expression, heap), inside=inside)
+                if isinstance(expression, Function) or isinstance(expression, Bind):
+                    heap.insert(0, (expression.name, result))
         return self.interpret_expression(Nil())
 
     def interpret_expression(self, expression, environment=[]):
@@ -53,22 +54,13 @@ class Interpreter(object):
         return Closure(function, environment)
 
     def interpret_call(self, call, environment):
-        if is_builtin(call):
-            call_args = []
-            for arg in call.args:
-                if isinstance(arg, str):
-                    call_args.append(environment[arg])
-                else:
-                    node = trampoline(self.interpret_expression)(arg, environment)
-                    if isinstance(node, Call):
-                        node = trampoline(self.interpret_expression)(node, environment)
-                    call_args.append(node)
-            return arithmetic(call.name, *call_args)
-
         value = environment[call.name]
-        if isinstance(value, Closure):
-            function = value.function
-            environment = value.environment + environment
+        if isinstance(value, Closure) or isinstance(value, BuiltinFunction):
+            if isinstance(value, Closure):
+                function = value.function
+                environment = value.environment + environment
+            else:
+                function = value
             arg_name_index = 0
             for arg in call.args:
                 if isinstance(arg, str):
@@ -79,17 +71,20 @@ class Interpreter(object):
                     arg_value = arg
                 environment[function.args[arg_name_index]] = arg_value
                 arg_name_index += 1
-            return self.interpret_expressions(function.expressions, environment, inside=True)
+            if isinstance(value, Closure):
+                return self.interpret_expressions(function.expressions, environment, inside=True)
+            else:
+                return value.call(self.interpret_expression, environment)
         elif isinstance(value, Call):
             return partial(self.interpret_expression, value, environment)
         else:
             return value
 
     def interpret_int(self, integer):
-        return integer.value
+        return integer
 
     def interpret_float(self, float):
-        return float.value
+        return float
 
     def interpret_return(self, exreturn, environment=[]):
         if isinstance(exreturn, Closure):

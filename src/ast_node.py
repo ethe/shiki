@@ -95,21 +95,18 @@ class Number(Expression):
             return False
         return self.value == another.value
 
+    def __repr__(self):
+        return str(self.value)
+
 
 class Int(Number):
     def __init__(self, number, line=0):
         super(Int, self).__init__(int(number), line)
 
-    def __repr__(self):
-        return "<Int {}>".format(self.value)
-
 
 class Float(Number):
     def __init__(self, number, line=0):
         super(Float, self).__init__(float(number), line)
-
-    def __repr__(self):
-        return "<Float {}>".format(self.value)
 
 
 class Return(Expression):
@@ -159,3 +156,14 @@ class Closure(object):
 
     def __repr__(self):
         return "<Closure {}>".format(self.function.name)
+
+
+class BuiltinFunction(Function):
+    def __init__(self, name=None, args=[], expressions=Expressions([]), line=0):
+        super(BuiltinFunction, self).__init__(name=name, args=args, expressions=expressions, line=line)
+
+    def call(self, interpret, environment):
+        self.values = []
+        for i in self.args:
+            self.values.append(interpret(environment[i], environment).value)
+        return self.oprate()

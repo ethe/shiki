@@ -1,10 +1,37 @@
 # -*- coding: utf-8 -*-
-def arithmetic(oprator, one, another):
-    if oprator == "+":
-        return one + another
-    elif oprator == "-":
-        return one - another
-    elif oprator == "*":
-        return one * another
-    elif oprator == "/":
-        return one / another
+from src.ast_node import *
+
+
+class Add(BuiltinFunction):
+    def __init__(self):
+        super(Add, self).__init__(name="+", args=["one", "another"])
+
+    def oprate(self):
+        return Number(self.values[0] + self.values[1])
+
+
+class Minus(BuiltinFunction):
+    def __init__(self):
+        super(Minus, self).__init__(name="-", args=["one", "another"])
+
+    def oprate(self):
+        return Number(self.values[0] - self.values[1])
+
+
+class Multiply(BuiltinFunction):
+    def __init__(self):
+        super(Multiply, self).__init__(name="*", args=["one", "another"])
+
+    def oprate(self):
+        return Number(self.values[0] * self.values[1])
+
+
+class Division(BuiltinFunction):
+    def __init__(self):
+        super(Division, self).__init__(name="/", args=["one", "another"])
+
+    def oprate(self):
+        return Number(self.values[0] / self.values[1])
+
+
+builtin = [Add(), Minus(), Multiply(), Division()]

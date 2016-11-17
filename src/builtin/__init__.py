@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-from .arithmetic import arithmetic
+from .arithmetic import builtin
 
 
-def is_builtin(call):
-    if hasattr(call, "name"):
-        return call.name in ['+', '-', '*', '/']
-    return False
-
-
-def builtin_victor(*args, **kwargs):
-    if call.name in ['+', '-', '*', '/']:
-        return arithmetic(args[0], args[1], args[2])
+def builtin_init():
+    environment = []
+    environment.extend([(func.name, func) for func in builtin])
+    return environment
